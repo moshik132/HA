@@ -1,0 +1,78 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+group: !include groups.yaml
+
+jewish_calendar:
+    language: hebrew
+# Google calendar configuration.yaml entry
+google:
+  client_id: !secret google_client_id_calendar
+  client_secret: !secret google_client_secret_calendar
+  
+########### CONFIGURATION.YAML ############
+vacuum:
+  - platform: xiaomi_miio
+    host: !secret xiaomi_miio
+    token: !secret xiaomi_miio_token
+############webtv######    
+
+sensor:
+######17track#####
+  - platform: seventeentrack
+    username: !secret seven_user
+    password: !secret seven_pass
+    # systemmonitor#
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /home
+      - type: memory_free
+      - type: last_boot
+      #########sensor.total_tv_time######
+  - platform: history_stats
+    name: Total TV Time
+    entity_id: media_player.living_room_tv
+    state: 'on'
+    type: time
+    start: '{{ now().replace(hour=0, minute=0, second=0) }}'
+    end: '{{ now() }}'
+      #######WAZE#######
+  - platform: waze_travel_time
+    origin: 31.968485, 34.795416
+    destination: 31.915744, 34.868030
+    region: 'IL'
+    name: To Work
+    
+  - platform: waze_travel_time
+    origin: 31.915744, 34.868030
+    destination: 31.968485, 34.795416
+    region: 'IL'
+    name: To Home
+    
+  - platform: template
+    sensors:
+    to_wotk_distance:
+      unit_of_measurement: 'KM'
+      value_template: '{{ states.sensor.to_work.attributes.distance }}'
+      friendly_name: 'Distance'
+      icon_template: mdi:map-marker-distance
+     
+ 
+  - platform: template
+    sensors:
+    to_wotk_route:
+      value_template: '{{ states.sensor.to_work.attributes.route }}'
+      friendly_name: 'Route'
+      icon_template: mdi:routes
+ 
+  - platform: template
+    sensors:
+    back_home_distance:
+      unit_of_measurement: 'KM'
+      value_template: '{{ states.sensor.back_home.attributes.distance }}'
+      friendly_name: 'Distance'
+      icon_template: mdi:map-marker-distance
